@@ -3,6 +3,7 @@ import pandas as pd
 import matplotlib.pyplot as plt
 import seaborn as sns
 import platform
+import urllib.parse
 
 # ==============================
 # ⚙️ 한글 폰트 설정 (macOS 포함)
@@ -56,11 +57,10 @@ with tabs[0]:
     st.markdown("---")
 
     # ---------------------------------
-    # 🚨 이탈 위험 고객 TOP 10 리스트  ← (이 부분을 위로 이동시킴)
+    # 🚨 이탈 위험 고객 TOP 10 리스트
     # ---------------------------------
     st.subheader("🚨 이탈 위험 고객 TOP 10")
 
-    # 이탈 위험 고객 필터링 (두 모델 공통 이탈)
     risky_customers = (
         df[df['Both_ChurnFlag'] == 1]
         .dropna(subset=['CustomerID'])
@@ -69,14 +69,21 @@ with tabs[0]:
         [['CustomerID', 'ChurnRiskScore', 'PurchaseFrequency', 'CSFrequency']]
     )
 
-    # 표 스타일
-    st.dataframe(
-        risky_customers.style.background_gradient(
-            cmap="Reds", subset=['ChurnRiskScore']
-        ).format({'ChurnRiskScore': '{:.2f}', 'PurchaseFrequency': '{:.2f}', 'CSFrequency': '{:.2f}'})
+    # 🔗 링크 생성 (앞의 슬래시 제거)
+    risky_customers['CustomerID'] = risky_customers['CustomerID'].apply(
+    lambda cid: f"<a href='CustomerDetail?customer_id={cid}' target='_self'>{cid}</a>"
     )
 
-    st.caption("※ 상위 10명은 Isolation Forest + Autoencoder 공통으로 '이탈 위험'으로 탐지된 고객입니다.")
+    st.markdown(
+        risky_customers
+        .style.background_gradient(cmap="Reds", subset=['ChurnRiskScore'])
+        .format({'ChurnRiskScore': '{:.2f}', 'PurchaseFrequency': '{:.2f}', 'CSFrequency': '{:.2f}'})
+        .hide(axis="index")
+        .to_html(escape=False),
+        unsafe_allow_html=True
+    )
+
+    st.caption("※ 고객 ID를 클릭하면 맞춤 관리 전략 페이지로 이동합니다.")
 
     st.markdown("---")
 
