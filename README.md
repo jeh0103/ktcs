@@ -94,5 +94,3 @@ Storage	SQLite (액션 로그), JSON (라벨 매핑)
 	•	License: MIT
 	•	Last Updated: 2025-11-12
 
-
-추가할까요?
